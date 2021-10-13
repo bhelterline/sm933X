@@ -20,13 +20,8 @@ class SM9333
 public:
     // consructor
     SM9333();
-
-    void set_multiplex(int multiplex_output);
-
-    // connect the chip & sets self.address
-    // Wiring must be correct and board must be connected.
-    // Returns if connect was successful
-    // bool connect();
+	
+	bool begin();
 
     // checks if the chip is connected
     bool isConnected();
@@ -46,8 +41,6 @@ public:
     pressureTemperaturePair readBoth();
 
 private:
-    // the address of the instance/the physical chip
-    int multiplex_output;
 
     // using the low byte and high byte sent by the chip, calculates the Pressure using bitwise math and
     // also the equation provided in the datasheet.
@@ -63,7 +56,6 @@ private:
     // requests a read from the chip of numBits number of bits, and with or without CRC protection
     int* doRead(int numBits, bool crcProtected, int location);
 
-    void multiplex_switch();
 };
 
 

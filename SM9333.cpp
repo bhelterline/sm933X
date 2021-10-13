@@ -6,11 +6,9 @@
 
 SM9333::SM9333() {}
 
-void SM9333::set_multiplex(int multiplex_output) {
-    if (multiplex_output < 0x71 || multiplex_output > 0x77)
-        assert(false);
-    this->multiplex_output = multiplex_output;
-    assert(this->isConnected());
+bool SM9333::begin() {
+    Wire.begin();
+    return true;
 }
 
 bool SM9333::isConnected() {
@@ -61,7 +59,6 @@ double SM9333::calculateTemperature(int temperatureLowBit, int temperatureHighBi
 }
 
 void SM9333::writer(commandSequence seq) {
-    this->multiplex_switch();
     Wire.beginTransmission(SM9333_UNPROTECTED);
     for (int i = 0; i < seq.length; i++) {
         int val = seq.sequence[i];
@@ -72,23 +69,17 @@ void SM9333::writer(commandSequence seq) {
 }
 
 int* SM9333::doRead(int numBits, bool crcProtected, int location) {
-    this->multiplex_switch();
     int crcLoc = crcProtected ? SM9333_CRC_PROTECTED : SM9333_UNPROTECTED;
     int command[3] = {location, 0x5B, 0xDB};
     commandSequence seq = {command, 3};
     writer(seq);
     Wire.requestFrom(crcLoc, numBits);
 
-    // int result[numBits];
-    int* result;
+    static int result[8];
+    //int* result;
     for (int i = 0; i < numBits; i++) {
         *(result+i) = Wire.read();
     }
     return result;
 }
 
-void SM9333::multiplex_switch() {
-    Wire.beginTransmission(0x70);
-    Wire.write(this->multiplex_output);
-    Wire.endTransmission();
-}
